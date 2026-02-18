@@ -1,4 +1,6 @@
 
+using ExpensesApi.Auth;
+
 namespace ExpensesApi
 {
     public class Program
@@ -6,6 +8,17 @@ namespace ExpensesApi
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+
+            builder.Services.Configure<JwtSettngs>(builder.Configuration.GetSection(JwtSettngs.SectionName));
+
+
+
+
+
+
+
+            builder.Services.AddAuthentication(JwtBarer)
 
             // Add services to the container.
 
