@@ -2,11 +2,12 @@
 {
     public record ExpenseDto(
         int Id,
-        string Title,
+        string? Title,
         decimal Amount,
-        string Currency,
-        string Category,
-        DateTime Date,
-        byte[] RowVersion
+        string? Currency,
+        string? Category,
+        DateTime? Date,
+        byte[]? RowVersion,
+        string? Message
     );
 }

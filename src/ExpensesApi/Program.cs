@@ -1,6 +1,7 @@
 
 using ExpensesApi.Auth;
 using ExpensesApi.Data;
+using ExpensesApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -18,7 +19,9 @@ namespace ExpensesApi
             builder.Services.AddDbContext<AppDbContext>(options=>options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 
+            builder.Services.AddHttpContextAccessor();
             builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<IExpenseService, ExpenseService>();
 
 
 

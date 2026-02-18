@@ -43,11 +43,14 @@ namespace ExpensesApi.Auth
         public async Task<LoginResponse?> LoginAsync(LoginRequist request)
         {
             var (isValid, userId) = await ValidateCredentialAsync(request.Username, request.Password);
-            if(isValid && userId != null)
+            if(!isValid && userId is null)
             {
-                return new LoginResponse(userId, GenerateToken(userId, request.Username), "Login successful");
+                return new LoginResponse(null, null, null, "Invalid username or password");
             }
-            return new LoginResponse(null, null, "Invalid username or password");
+
+            var token = GenerateToken(userId!, request.Username);
+            return new LoginResponse(token, request.Username, userId, "Login successful");
+
         }
 
         public async Task<RegisterResponce?> RegisterAsync(RegisterRequest request)
@@ -65,9 +68,9 @@ namespace ExpensesApi.Auth
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
                 CreatedAt = DateTime.UtcNow
             };
-            _context.Users.Add(user);
+            await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
-            return new RegisterResponce(userId, GenerateToken(userId, request.Username), "User registered succefully");
+            return new RegisterResponce(userId, request.Username, "User registered succefully");
         }
 
         private async Task<(bool Isvalid, string? UserId)> ValidateCredentialAsync(string username, string password)
