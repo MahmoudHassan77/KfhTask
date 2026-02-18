@@ -1,5 +1,9 @@
 
 using ExpensesApi.Auth;
+using ExpensesApi.Data;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace ExpensesApi
 {
@@ -11,19 +15,47 @@ namespace ExpensesApi
 
 
             builder.Services.Configure<JwtSettngs>(builder.Configuration.GetSection(JwtSettngs.SectionName));
+            builder.Services.AddDbContext<AppDbContext>(options=>options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+
+            builder.Services.AddScoped<IAuthService, AuthService>();
 
 
 
 
 
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.SaveToken = true;
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                        ValidAudience = builder.Configuration["Jwt:Audience"],
+                        IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
+                        ClockSkew = TimeSpan.Zero
+                    };
+                }
+                );
 
+            builder.Services.AddAuthorization();
 
-            builder.Services.AddAuthentication(JwtBarer)
-
-            // Add services to the container.
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowSpecificApp", policy =>
+                {
+                    policy.AllowAnyOrigin() // In production, specify allowed origins instead of allowing any origin
+                          .AllowAnyMethod()
+                          .AllowAnyHeader();
+                });
+            });
+  
 
             builder.Services.AddControllers();
-            // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
 
             var app = builder.Build();
@@ -35,6 +67,8 @@ namespace ExpensesApi
             }
 
             app.UseHttpsRedirection();
+
+            app.UseCors("AllowSpecificApp");
 
             app.UseAuthorization();
 
