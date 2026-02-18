@@ -20,7 +20,7 @@ namespace ExpensesApi.Models
         [Required]
         public DateTime OccurredOn { get; set; }
         [Required]
-        public User? CreatedByUserId { get; set; } 
+        public string CreatedByUserId { get; set; } 
         [Timestamp]
         public byte[]? RowVersion { get; set; }
     }

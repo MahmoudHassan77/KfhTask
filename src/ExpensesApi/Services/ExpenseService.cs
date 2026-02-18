@@ -10,7 +10,7 @@ namespace ExpensesApi.Services
         private readonly ILogger<ExpenseService> _logger;
         private readonly AppDbContext _context;
         private readonly IConfiguration _configuration;
-        private readonly object? _httpContextAccessor;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public ExpenseService(ILogger<ExpenseService> logger, AppDbContext context, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
         {
@@ -85,7 +85,7 @@ namespace ExpensesApi.Services
             {
                 return new  ExpenseDto(-1, null!, 0, null, null!, default, null!, "Unverified currency type");
             }
-            var UserId = _httpContextAccessor is IHttpContextAccessor accessor ? accessor.HttpContext?.User?.FindFirst("sub")?.Value : null;
+            var UserId = _httpContextAccessor.HttpContext?.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             var expense = new Expense
             {
                 Title = expenseDto.Title!,
@@ -93,7 +93,7 @@ namespace ExpensesApi.Services
                 currency = expenseDto.Currency!,
                 Category = expenseDto.Category!,
                 OccurredOn = DateTime.UtcNow,
-                CreatedByUserId = UserId != null ? new Models.User { Id = UserId } : null
+                CreatedByUserId = UserId!
             };
             await _context.Expenses.AddAsync(expense);
             await _context.SaveChangesAsync();
